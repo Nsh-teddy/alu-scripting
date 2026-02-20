@@ -1,32 +1,49 @@
 #!/usr/bin/python3
 """
-1-top_ten
-Prints the titles of the first 10 hot posts of a subreddit
+Queries the Reddit API and prints the titles of the first 10 hot posts
+listed for a given subreddit.
 """
-
 import requests
 
 
 def top_ten(subreddit):
-    """Prints the titles of the first 10 hot posts of a subreddit"""
-    url = "https://www.reddit.com/r/{}/hot.json?limit=10".format(subreddit)
-
+    """
+    Prints the titles of the first 10 hot posts for a subreddit.
+    If the subreddit is invalid, prints None.
+    """
+    # Use a very specific User-Agent to avoid being throttled/blocked
     headers = {
-        "User-Agent": "python:alu-scripting:v1.0 (by /u/anonymous)"
+        'User-Agent': 'MyRedditBot/1.0 (by nshimyumurwa)'
     }
 
+    # The URL for the hot posts
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+
+    # Set limit to 10
+    params = {'limit': 10}
+
     try:
-        response = requests.get(url, headers=headers, allow_redirects=False)
+        # allow_redirects=False is crucial for invalid subreddits
+        response = requests.get(url, headers=headers, params=params,
+                                allow_redirects=False)
 
-        # Check if subreddit exists
-        if response.status_code != 200:
+        # Only proceed if the status is exactly 200 OK
+        if response.status_code == 200:
+            # We use .get() repeatedly to avoid KeyErrors
+            data = response.json().get('data', {})
+            children = data.get('children', [])
+
+            # Check if we actually got children back
+            if not children:
+                print(None)
+                return
+
+            for post in children:
+                print(post.get('data', {}).get('title'))
+        else:
+            # This catches 404, 302, 429, etc.
             print(None)
-            return
-
-        posts = response.json().get("data", {}).get("children", [])
-
-        for post in posts:
-            print(post.get("data", {}).get("title"))
 
     except Exception:
+        # Any other error (network, JSON parsing) prints None
         print(None)
