@@ -17,9 +17,9 @@ def top_ten(subreddit):
         None
     """
     url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
-    
+
     headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
+        "User-Agent": "python:subreddit.top10:v1.0.0 (by /u/holberton_student)"
     }
     params = {
         "limit": 10
